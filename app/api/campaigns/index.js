@@ -55,7 +55,7 @@ router.get('/:id/updates', async (req, res) => {
   const { id } = req.params;
 
   try {
-    const updates = CampaignPosts.findAllCampaignUpdatesByCampaignId(id);
+    const updates = await CampaignPosts.findAllCampaignUpdatesByCampaignId(id);
 
     return res.status(200).json(updates);
   } catch (err) {
