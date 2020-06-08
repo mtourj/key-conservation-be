@@ -102,11 +102,17 @@ async function findById(id) {
 }
 
 async function findOriginalCampaignPostByCampaignId(campaignId) {
-  return getPostsWhere({ is_update: false, 'campaign_posts.campaign_id': campaignId }).first();
+  return getPostsWhere({
+    is_update: false,
+    'campaign_posts.campaign_id': campaignId,
+  }).first();
 }
 
 async function findAllCampaignUpdatesByCampaignId(campaignId) {
-  return getPostsWhere({ 'campaign_posts.campaign_id': campaignId });
+  return getPostsWhere({
+    'campaign_posts.campaign_id': campaignId,
+    'campaign_posts.is_update': true,
+  });
 }
 
 async function insert(post) {
