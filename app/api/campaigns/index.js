@@ -51,6 +51,21 @@ router.get('/:id/original', async (req, res) => {
   }
 });
 
+router.get('/:id/updates', async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    const updates = await CampaignPosts.findAllCampaignUpdatesByCampaignId(id);
+
+    return res.status(200).json(updates);
+  } catch (err) {
+    return res.status(500).json({
+      message:
+        'An internal server error occurred while retrieving updates for that campaign',
+    });
+  }
+});
+
 router.get('/:id', async (req, res) => {
   const { id } = req.params;
 
@@ -93,7 +108,8 @@ router.get('/:id/submissions', async (req, res) => {
 router.post('/', S3Upload.upload.single('photo'), async (req, res) => {
   const { location: image } = req.file;
   const skilledImpactRequests = typeof req.body.skilledImpactRequests === 'string'
-    ? JSON.parse(req.body.skilledImpactRequests) : req.body.skilledImpactRequests;
+    ? JSON.parse(req.body.skilledImpactRequests)
+    : req.body.skilledImpactRequests;
 
   const {
     // eslint-disable-next-line camelcase
