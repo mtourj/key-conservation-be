@@ -35,12 +35,10 @@ router.get('/:sub', async (req, res) => {
         .status(200)
         .json({ approved: 'Approved', message: 'The user was approved' });
     } else if (!vettingUser) {
-      return res
-        .status(200)
-        .json({
-          approved: 'Denied',
-          message: "The user's application was denied",
-        });
+      return res.status(200).json({
+        approved: 'Denied',
+        message: "The user's application was denied",
+      });
     }
   } catch (error) {
     log.error(error);
@@ -77,6 +75,7 @@ router.delete('/:idOrSub', async (req, res) => {
     const deleted = await Vetting.deleteUser(idOrSub);
     if (deleted === idOrSub) {
       res.status(200).json({
+        sub: deleted.sub,
         msg: `User has been deleted from vetting table.`,
       });
     } else {
