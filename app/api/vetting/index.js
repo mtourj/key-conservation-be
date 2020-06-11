@@ -4,6 +4,8 @@ const log = require('../../logger');
 const S3Upload = require('../../middleware/s3Upload');
 
 const Vetting = require('../../database/models/vettingModel');
+const Users = require('../../database/models/usersModel');
+
 
 router.get('/', async (req, res) => {
   const allUsers = await Vetting.findAll();
@@ -19,17 +21,21 @@ router.get('/', async (req, res) => {
   }
 });
 
-router.get('/:id', async (req, res) => {
-  const { id } = req.params;
+router.get('/:sub', async (req, res) => {
+  const { sub } = req.params;
   try {
-    const user = await Vetting.findVettingUserBySub(id);
-    if (user) {
-      return res.status(200).json({ user, message: 'The user was found' });
-    } else {
+    const vettingUser = await Vetting.findVettingUserBySub(sub);
+    const user = await Users.findBySub(sub);
+    const 
+    if (vettingUser) {
       return res
-        .status(404)
-        .json({ message: 'User not found in the database' });
-    }
+        .status(200)
+        .json({ vettingUser, message: 'The user has not yet been verified' });
+    } else if(user) {
+        return res.status(200).json({user, message: "The user was successfully verified."})
+      } else {
+        return res.status(404).json({message: "The user's application was denied"})
+      }    
   } catch (error) {
     log.error(error);
     return res.status(500).json({ message: error.message, error });
