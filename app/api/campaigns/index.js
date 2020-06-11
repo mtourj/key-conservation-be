@@ -147,6 +147,9 @@ router.post('/', S3Upload.upload.single('photo'), async (req, res) => {
       // Send over WebSockets
       sendWSMessage({
         feed: newCampaigns,
+        posts: {
+          campaigns: newCampaigns,
+        },
       });
 
       // eslint-disable-next-line camelcase
@@ -184,6 +187,9 @@ router.post(
 
         sendWSMessage({
           feed: post,
+          profile: {
+            posts: post,
+          },
         });
 
         res
