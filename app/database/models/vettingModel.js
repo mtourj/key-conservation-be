@@ -40,7 +40,7 @@ const deleteUser = async (filter) => {
 const approveUser = async (id) => {
   const user = await findVettingUserById(id);
   const newUser = await Users.add(user);
-  deleteUser(id);
+  db('vetting').update({ approved: true }).where({ id });
   return newUser;
 };
 
