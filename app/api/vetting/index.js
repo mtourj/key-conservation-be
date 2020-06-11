@@ -6,7 +6,6 @@ const S3Upload = require('../../middleware/s3Upload');
 const Vetting = require('../../database/models/vettingModel');
 const Users = require('../../database/models/usersModel');
 
-
 router.get('/', async (req, res) => {
   const allUsers = await Vetting.findAll();
   try {
@@ -25,17 +24,24 @@ router.get('/:sub', async (req, res) => {
   const { sub } = req.params;
   try {
     const vettingUser = await Vetting.findVettingUserBySub(sub);
-    const user = await Users.findBySub(sub);
-    const 
-    if (vettingUser) {
+    if (vettingUser && vettingUser.approved === false) {
+      return res.status(200).json({
+        approved: 'Pending',
+        message: 'The user has not yet been verified',
+      });
+    } else if (vettingUser && vettingUser.approved === true) {
+      Vetting.deleteUser(sub);
       return res
         .status(200)
-        .json({ vettingUser, message: 'The user has not yet been verified' });
-    } else if(user) {
-        return res.status(200).json({user, message: "The user was successfully verified."})
-      } else {
-        return res.status(404).json({message: "The user's application was denied"})
-      }    
+        .json({ approved: 'Approved', message: 'The user was approved' });
+    } else if (!vettingUser) {
+      return res
+        .status(200)
+        .json({
+          approved: 'Denied',
+          message: "The user's application was denied",
+        });
+    }
   } catch (error) {
     log.error(error);
     return res.status(500).json({ message: error.message, error });
@@ -65,11 +71,11 @@ router.post('/', S3Upload.upload.single('photo'), async (req, res) => {
   }
 });
 
-router.delete('/:id', async (req, res) => {
-  const { id } = req.params;
+router.delete('/:idOrSub', async (req, res) => {
+  const { idOrSub } = req.params;
   try {
-    const deleted = await Vetting.deleteUser(id);
-    if (deleted === id) {
+    const deleted = await Vetting.deleteUser(idOrSub);
+    if (deleted === idOrSub) {
       res.status(200).json({
         msg: `User has been deleted from vetting table.`,
       });
