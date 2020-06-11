@@ -111,7 +111,6 @@ async function findOriginalCampaignPostByCampaignId(campaignId) {
 async function findAllCampaignUpdatesByCampaignId(campaignId, limit = 2048) {
   return getPostsWhere({
     'campaign_posts.campaign_id': campaignId,
-    'campaign_posts.is_update': true,
   }).limit(limit);
 }
 
