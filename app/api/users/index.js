@@ -9,6 +9,8 @@ const Reports = require('../../database/models/reportModel');
 const Connections = require('../../database/models/connectionsModel');
 const ApplicationSubmission = require('../../database/models/applicationSubmissionsModel');
 
+const pick = require('../../../util/pick');
+
 const S3Upload = require('../../middleware/s3Upload');
 const restricted = require('../../middleware/authJwt.js');
 const {
@@ -82,8 +84,8 @@ router.get('/:id/posts', async (req, res) => {
   } catch (err) {
     return res.status(500).json({
       message:
-        err.message
-        || 'An internal server occurred while trying to retreive this users posts',
+        err.message ||
+        'An internal server occurred while trying to retreive this users posts',
     });
   }
 });
@@ -205,34 +207,42 @@ router.post('/', S3Upload.upload.single('photo'), async (req, res) => {
 });
 
 router.put(
-  '/:id',
+  '/',
   restricted,
   S3Upload.upload.single('photo'),
   async (req, res) => {
-    const { id } = req.params;
+    const sanitizedBody = pick(req.body, [
+      'name',
+      'phone_numner',
+      'mini_bio',
+      'about_us',
+      'facebook',
+      'instagram',
+      'twitter',
+      'link_url',
+      'location',
+      'profile_image',
+    ]);
 
     const newUser = {
-      ...req.body,
-      profile_image: req.file
-        ? req.file.location
-        : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
+      ...sanitizedBody,
     };
+
+    if (sanitizedBody.profile_image !== undefined) {
+      newUser.profile_image = req.file
+        ? req.file.location
+        : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
+    }
 
     log.verbose('Updated user in PUT /users/:id', newUser);
 
     try {
       const reqUsr = await Users.findBySub(req.user.sub);
 
-      if (Number(reqUsr.id) !== Number(id) && !reqUsr.admin) {
-        return res
-          .status(401)
-          .json({ message: 'You may not modify this profile!' });
-      }
-
-      const user = await Users.update(newUser, id);
+      const user = await Users.update(newUser, reqUsr.id);
 
       if (user) {
-        res.status(200).json({ message: 'Successfully updated user', user });
+        res.status(200).json(newUser);
       } else {
         res.status(404).json({ message: 'The user would not be updated' });
       }
@@ -242,7 +252,7 @@ router.put(
         .status(500)
         .json({ err, message: 'Unable to update user on the database' });
     }
-  },
+  }
 );
 
 router.post('/deactivate/:id', restricted, async (req, res) => {
@@ -273,7 +283,7 @@ router.post('/deactivate/:id', restricted, async (req, res) => {
     // Archive all reports relating to this user
     await Reports.updateWhere(
       { reported_user: req.params.id },
-      { is_archived: true },
+      { is_archived: true }
     );
 
     // Respond with 200 OK
@@ -368,7 +378,7 @@ router.post(
         .status(500)
         .json({ err, msg: 'Unable to add connection to database' });
     }
-  },
+  }
 );
 
 router.delete('/connect/:id', async (req, res) => {
@@ -394,7 +404,7 @@ router.delete('/connect/:id', async (req, res) => {
 router.get('/connect/:userId', async (req, res) => {
   try {
     const userConnections = await Connections.getConnectionsByUserId(
-      req.params.userId,
+      req.params.userId
     );
 
     res.status(200).json(userConnections);
@@ -419,13 +429,13 @@ router.put('/connect/:connectionId', async (req, res) => {
 
   const updated = await Connections.respondToConnectionRequest(
     req.params.connectionId,
-    req.body.status,
+    req.body.status
   );
 
   try {
     if (updated === 1) {
       const newConnectionStatus = await Connections.getConnectionById(
-        req.params.connectionId,
+        req.params.connectionId
       );
       res.status(201).json({
         msg: `The status of connection with id ${req.params.connectionId} was changed to ${newConnectionStatus.status}`,
