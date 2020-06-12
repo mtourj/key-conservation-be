@@ -20,6 +20,7 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Check vetting status, and if approved, delete from vetting table
 router.get('/:sub', async (req, res) => {
   const { sub } = req.params;
   try {
@@ -30,10 +31,11 @@ router.get('/:sub', async (req, res) => {
         message: 'The user has not yet been verified',
       });
     } else if (vettingUser && vettingUser.approved === true) {
-      Vetting.deleteUser(sub);
+      Vetting.deleteUser(vettingUser.id);
+      const newUser = await Users.findBySub(sub);
       return res
         .status(200)
-        .json({ approved: 'Approved', message: 'The user was approved' });
+        .json({ newUser, message: 'The user was approved' });
     } else if (!vettingUser) {
       return res.status(200).json({
         approved: 'Denied',

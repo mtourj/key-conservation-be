@@ -27,21 +27,24 @@ const findAll = async () => {
   return db('vetting');
 };
 
-const deleteUser = async (filter) => {
-  const deleted = await db('vetting').where({ filter }).del();
+const deleteUser = async (id) => {
+  const deleted = await db('vetting').where({ id }).del();
   if (deleted === 1) {
-    return filter;
+    return id;
   } else {
     return 0;
   }
 };
 
-// copies user to users and conservationists table and deletes them from vetting table
+// copies user to users and conservationists table and changes approved column to true
 const approveUser = async (id) => {
   const user = await findVettingUserById(id);
   const newUser = await Users.add(user);
-  db('vetting').update({ approved: true }).where({ id });
-  return newUser;
+  const approved = await db('vetting').where({ id }).update({ approved: true });
+  return {
+    newUser: newUser,
+    approved: approved,
+  };
 };
 
 module.exports = {
