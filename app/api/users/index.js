@@ -215,6 +215,9 @@ router.put(
       'name',
       'phone_numner',
       'mini_bio',
+      'email',
+      'link_text',
+      'call_to_action',
       'about_us',
       'facebook',
       'instagram',
@@ -222,6 +225,7 @@ router.put(
       'link_url',
       'location',
       'profile_image',
+      'skills',
     ]);
 
     const newUser = {
