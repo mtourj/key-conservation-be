@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const log = require('../../logger');
 const S3Upload = require('../../middleware/s3Upload');
+const sendApprovalMail = require('../../../util/sendgrid');
+const sendDenialMail = require('../../../util/sendgrid');
 
 const Vetting = require('../../database/models/vettingModel');
 const Users = require('../../database/models/usersModel');
@@ -71,11 +73,13 @@ router.post('/', S3Upload.upload.single('photo'), async (req, res) => {
   }
 });
 
-router.delete('/:idOrSub', async (req, res) => {
-  const { idOrSub } = req.params;
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
   try {
-    const deleted = await Vetting.deleteUser(idOrSub);
-    if (deleted === idOrSub) {
+    const deleted = await Vetting.deleteUser(id);
+    const user = await Users.findById(id);
+    if (deleted === id) {
+      sendDenialMail('rasha@rasha.dev');
       res.status(200).json({
         sub: deleted.sub,
         msg: `User has been deleted from vetting table.`,
@@ -96,6 +100,7 @@ router.put('/:id', async (req, res) => {
   try {
     const approvedUser = await Vetting.approveUser(id);
     if (approvedUser) {
+      sendApprovalMail('rasha@rasha.dev');
       return res.status(201).json({
         approvedUser,
         message: 'The user was moved successfully to the users table',
