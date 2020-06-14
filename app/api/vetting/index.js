@@ -73,11 +73,12 @@ router.post('/', S3Upload.upload.single('photo'), async (req, res) => {
   }
 });
 
+// deny application
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const deleted = await Vetting.deleteUser(id);
-    const user = await Users.findById(id);
+    // const user = await Users.findById(id);
     if (deleted === id) {
       sendDenialMail('rasha@rasha.dev');
       res.status(200).json({
@@ -95,6 +96,7 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// approve application
 router.put('/:id', async (req, res) => {
   const id = req.params.id;
   try {

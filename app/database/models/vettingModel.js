@@ -36,15 +36,12 @@ const deleteUser = async (id) => {
   }
 };
 
-// copies user to users and conservationists table and changes approved column to true
+// copies user to users and conservationists table and deletes user from vetting table
 const approveUser = async (id) => {
   const user = await findVettingUserById(id);
   const newUser = await Users.add(user);
-  const approved = await db('vetting').where({ id }).update({ approved: true });
-  return {
-    newUser: newUser,
-    approved: approved,
-  };
+  deleteUser(id);
+  return newUser;
 };
 
 module.exports = {
