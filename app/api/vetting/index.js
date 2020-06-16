@@ -22,27 +22,27 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Check vetting status, and if approved, delete from vetting table
+// Check vetting status with user sub
 router.get('/:sub', async (req, res) => {
   const { sub } = req.params;
   try {
     const vettingUser = await Vetting.findVettingUserBySub(sub);
-    if (vettingUser && vettingUser.approved === false) {
+    if (vettingUser) {
       return res.status(200).json({
         approved: 'Pending',
         message: 'The user has not yet been verified',
       });
-    } else if (vettingUser && vettingUser.approved === true) {
-      Vetting.deleteUser(vettingUser.id);
+    } else {
       const newUser = await Users.findBySub(sub);
-      return res
-        .status(200)
-        .json({ newUser, message: 'The user was approved' });
-    } else if (!vettingUser) {
-      return res.status(200).json({
-        approved: 'Denied',
-        message: "The user's application was denied",
-      });
+      if (newUser) {
+        return res
+          .status(200)
+          .json({ approved: 'Approved', message: 'The user was approved' });
+      } else {
+        return res
+          .status(404)
+          .json({ approved: 'Denied', message: 'The user was denied' });
+      }
     }
   } catch (error) {
     log.error(error);
@@ -78,13 +78,13 @@ router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const deleted = await Vetting.deleteUser(id);
-    // const user = await Users.findById(id);
     if (deleted === id) {
       sendDenialMail('rasha@rasha.dev');
       res.status(200).json({
         sub: deleted.sub,
         msg: `User has been deleted from vetting table.`,
       });
+      //TODO delete from auth0 using https://auth0.github.io/node-auth0/, https://auth0.com/docs/api/management/v2#!/Users/delete_users_by_id, https://community.auth0.com/t/how-do-i-delete-a-user-from-auth0/6618
     } else {
       res
         .status(404)
