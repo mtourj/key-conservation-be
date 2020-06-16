@@ -30,18 +30,4 @@ const sendDenialMail = (user_email) => {
     .catch(console.log);
 };
 
-const msg = {
-  to: 'rasha@rasha.dev',
-  from: 'rasha@fastmail.com',
-  subject: 'Sending with Twilio SendGrid is Fun',
-  text: 'and easy to do anywhere, even with Node.js',
-  html: '<strong>and easy to do anywhere, even with Node.js</strong>',
-};
-
-sgMail
-  .send(msg)
-  .then(() => console.log('send mail success'))
-  .catch(console.log);
-
-// module.exports = { sendApprovalMail, sendDenialMail, sgMail };
-module.exports = sgMail;
+module.exports = { sendApprovalMail, sendDenialMail };
