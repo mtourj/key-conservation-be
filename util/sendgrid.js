@@ -1,11 +1,5 @@
 require('dotenv').config();
-// using Twilio SendGrid's v3 Node.js Library
-// https://github.com/sendgrid/sendgrid-nodejs
 const sgMail = require('@sendgrid/mail');
-// sgMail.setApiKey(
-//   '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'
-// );
-
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 const sendApprovalMail = (user_email) => {
