@@ -4,6 +4,7 @@ const log = require('../../logger');
 const S3Upload = require('../../middleware/s3Upload');
 const sendApprovalMail = require('../../../util/sendgrid');
 const sendDenialMail = require('../../../util/sendgrid');
+const deleteFromAuth0 = require('../../auth/auth0-management');
 
 const Vetting = require('../../database/models/vettingModel');
 const Users = require('../../database/models/usersModel');
@@ -78,13 +79,15 @@ router.delete('/:id', async (req, res) => {
   const { id } = req.params;
   try {
     const deleted = await Vetting.deleteUser(id);
+
     if (deleted === id) {
       sendDenialMail('rasha@rasha.dev');
+      const user = await Vetting.findVettingUserById(id);
+      deleteFromAuth0(user.sub);
       res.status(200).json({
         sub: deleted.sub,
         msg: `User has been deleted from vetting table.`,
       });
-      //TODO delete from auth0 using https://auth0.github.io/node-auth0/, https://auth0.com/docs/api/management/v2#!/Users/delete_users_by_id, https://community.auth0.com/t/how-do-i-delete-a-user-from-auth0/6618
     } else {
       res
         .status(404)
