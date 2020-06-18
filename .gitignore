@@ -64,4 +64,3 @@ typings/
 .idea/
 
 .DS_Store
-sendgrid.env
