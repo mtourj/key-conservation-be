@@ -93,7 +93,10 @@ async function findById(id) {
         'cons.point_of_contact_name',
         'cons.point_of_contact_email',
         'cons.latitude',
-        'cons.longitude'
+        'cons.longitude',
+        db.raw(
+          "array_agg(json_build_object('skill', skills.skill, 'description', COALESCE(skills.description, ''))) as skills"
+        )
       )
       .groupBy('users.id', 'cons.id')
       .first();
@@ -126,48 +129,40 @@ async function findById(id) {
 async function findBySub(sub) {
   // This is used only to verify user information at login. It does not collect campaign information.
   let user = await db('users').where({ sub }).first();
-
-  try {
-    if (user) {
-      const { id } = user;
-
-      if (user.roles === 'conservationist') {
-        user = await db('users')
-          .leftJoin('conservationists as cons', 'cons.user_id', 'users.id')
-          .leftJoin('skills', 'skills.user_id', 'users.id')
-          .where('users.id', id)
-          .select(
-            'users.*',
-            'cons.id AS conservationist_id',
-            'cons.name',
-            'cons.link_url',
-            'cons.link_text',
-            'cons.call_to_action',
-            'cons.about_us',
-            'cons.issues',
-            'cons.support_us',
-            'cons.longitude',
-            'cons.latitude',
-            db.raw('array_to_json(array_agg(skills.skill)) as skills')
-          )
-          .groupBy('users.id', 'cons.id')
-          .first();
-        user.bookmarks = await Bookmarks.findUserBookmarks(id);
-      } else if (user.roles === 'supporter') {
-        const bookmarks = await Bookmarks.findUserBookmarks(id);
-        user = await db('users')
-          .leftJoin('supporters as sup', 'sup.user_id', 'users.id')
-          .where('users.id', id)
-          .select('users.*', 'sup.name')
-          .first();
-        user.bookmarks = bookmarks;
-      }
-
-      return user;
-    }
-  } catch (err) {
-    console.log('no user');
+  const { id } = user;
+  if (user.roles === 'conservationist') {
+    user = await db('users')
+      .leftJoin('conservationists as cons', 'cons.user_id', 'users.id')
+      .leftJoin('skills', 'skills.user_id', 'users.id')
+      .where('users.id', id)
+      .select(
+        'users.*',
+        'cons.id AS conservationist_id',
+        'cons.name',
+        'cons.link_url',
+        'cons.link_text',
+        'cons.call_to_action',
+        'cons.about_us',
+        'cons.issues',
+        'cons.support_us',
+        'cons.longitude',
+        'cons.latitude',
+        db.raw('array_to_json(array_agg(skills.skill)) as skills')
+      )
+      .groupBy('users.id', 'cons.id')
+      .first();
+    user.bookmarks = await Bookmarks.findUserBookmarks(id);
+  } else if (user.roles === 'supporter') {
+    const bookmarks = await Bookmarks.findUserBookmarks(id);
+    user = await db('users')
+      .leftJoin('supporters as sup', 'sup.user_id', 'users.id')
+      .where('users.id', id)
+      .select('users.*', 'sup.name')
+      .first();
+    user.bookmarks = bookmarks;
   }
+
+  return user;
 }
 
 // DO NOT MODIFY. This model is available to the outside.
@@ -234,6 +229,7 @@ async function add(user) {
           about_us: user.about_us,
           city: user.city,
           country: user.country,
+          point_of_contact_name: user.point_of_contact_name,
           longitude: user.longitude,
           latitude: user.latitude,
         };
