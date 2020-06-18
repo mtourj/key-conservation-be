@@ -29,6 +29,10 @@ router.get('/:sub', async (req, res) => {
   try {
     const vettingUser = await Vetting.findVettingUserBySub(sub);
     if (vettingUser) {
+      console.log(
+        'vetting user from get vetting status endopoint',
+        vettingUser
+      );
       return res.status(200).json({
         approvalStatus: 'Pending',
         message: 'The user has not yet been verified',
@@ -36,12 +40,11 @@ router.get('/:sub', async (req, res) => {
     } else {
       const newUser = await Users.findBySub(sub);
       if (newUser) {
-        return res
-          .status(200)
-          .json({
-            approvalStatus: 'Approved',
-            message: 'The user was approved',
-          });
+        console.log('newUser', newUser);
+        return res.status(200).json({
+          approvalStatus: 'Approved',
+          message: 'The user was approved',
+        });
       } else {
         return res
           .status(404)
