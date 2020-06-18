@@ -30,7 +30,7 @@ router.get('/:sub', async (req, res) => {
     const vettingUser = await Vetting.findVettingUserBySub(sub);
     if (vettingUser) {
       return res.status(200).json({
-        approved: 'Pending',
+        approvalStatus: 'Pending',
         message: 'The user has not yet been verified',
       });
     } else {
@@ -38,11 +38,14 @@ router.get('/:sub', async (req, res) => {
       if (newUser) {
         return res
           .status(200)
-          .json({ approved: 'Approved', message: 'The user was approved' });
+          .json({
+            approvalStatus: 'Approved',
+            message: 'The user was approved',
+          });
       } else {
         return res
           .status(404)
-          .json({ approved: 'Denied', message: 'The user was denied' });
+          .json({ approvalStatus: 'Denied', message: 'The user was denied' });
       }
     }
   } catch (error) {
