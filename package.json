@@ -13,7 +13,6 @@
     "db:rollback": "knex migrate:rollback",
     "db:seed": "knex seed:run"
   },
-  "jest": "cross-env DB_ENV=testing",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/labs14-key-conservation/backend.git"
@@ -25,8 +24,6 @@
   },
   "homepage": "https://github.com/labs14-key-conservation/backend",
   "dependencies": {
-    "@sendgrid/mail": "^7.2.0",
-    "auth0": "^2.26.0",
     "aws-sdk": "^2.509.0",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",
