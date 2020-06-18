@@ -15,8 +15,8 @@ class WebSocketManager {
 }
 
 function sendWSMessage(message, userId = null) {
-  if(userId) {
-    //TODO: Implement sending to specific clients
+  if (userId) {
+    // TODO: Implement sending to specific clients
     // console.log(WebSocketManager.getClients());
   } else {
     WebSocketManager.getClients().forEach((client) => {
@@ -25,7 +25,6 @@ function sendWSMessage(message, userId = null) {
       }
     });
   }
-
 }
 
 module.exports = { WebSocketManager, sendWSMessage };
