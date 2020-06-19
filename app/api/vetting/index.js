@@ -26,13 +26,11 @@ router.get('/', async (req, res) => {
 // Check vetting status with user sub
 router.get('/:sub', async (req, res) => {
   const { sub } = req.params;
+  console.log('sub from vetting endpoint', sub);
   try {
     const vettingUser = await Vetting.findVettingUserBySub(sub);
     if (vettingUser) {
-      console.log(
-        'vetting user from get vetting status endopoint',
-        vettingUser
-      );
+      console.log('vetting user from get vetting status endpoint', vettingUser);
       return res.status(200).json({
         approvalStatus: 'Pending',
         message: 'The user has not yet been verified',
