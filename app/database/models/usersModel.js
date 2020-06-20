@@ -52,7 +52,7 @@ function find() {
       'cons.issues',
       'cons.support_us',
       'sup.name as sup_name',
-      db.raw('array_to_json(array_agg(skills.skill)) as skills'),
+      db.raw('array_to_json(array_agg(skills.skill)) as skills')
     )
     .groupBy('users.id', 'cons.id');
 }
@@ -95,8 +95,8 @@ async function findById(id) {
         'cons.latitude',
         'cons.longitude',
         db.raw(
-          "array_agg(json_build_object('skill', skills.skill, 'description', COALESCE(skills.description, ''))) as skills",
-        ),
+          "array_agg(json_build_object('skill', skills.skill, 'description', COALESCE(skills.description, ''))) as skills"
+        )
       )
       .groupBy('users.id', 'cons.id')
       .first();
@@ -113,8 +113,8 @@ async function findById(id) {
         'users.*',
         'sup.name',
         db.raw(
-          "array_agg(json_build_object('skill', skills.skill, 'description', COALESCE(skills.description, ''))) as skills",
-        ),
+          "array_agg(json_build_object('skill', skills.skill, 'description', COALESCE(skills.description, ''))) as skills"
+        )
       )
       .groupBy('users.id', 'sup.name')
       .first();
@@ -130,41 +130,46 @@ async function findBySub(sub) {
   // This is used only to verify user information at login. It does not collect campaign information.
   let user = await db('users').where({ sub }).first();
 
-  const { id } = user;
+  try {
+    if (user) {
+      const { id } = user;
+      if (user.roles === 'conservationist') {
+        user = await db('users')
+          .leftJoin('conservationists as cons', 'cons.user_id', 'users.id')
+          .leftJoin('skills', 'skills.user_id', 'users.id')
+          .where('users.id', id)
+          .select(
+            'users.*',
+            'cons.id AS conservationist_id',
+            'cons.name',
+            'cons.link_url',
+            'cons.link_text',
+            'cons.call_to_action',
+            'cons.about_us',
+            'cons.issues',
+            'cons.support_us',
+            'cons.longitude',
+            'cons.latitude',
+            db.raw('array_to_json(array_agg(skills.skill)) as skills')
+          )
+          .groupBy('users.id', 'cons.id')
+          .first();
+        user.bookmarks = await Bookmarks.findUserBookmarks(id);
+      } else if (user.roles === 'supporter') {
+        const bookmarks = await Bookmarks.findUserBookmarks(id);
+        user = await db('users')
+          .leftJoin('supporters as sup', 'sup.user_id', 'users.id')
+          .where('users.id', id)
+          .select('users.*', 'sup.name')
+          .first();
+        user.bookmarks = bookmarks;
+      }
 
-  if (user.roles === 'conservationist') {
-    user = await db('users')
-      .leftJoin('conservationists as cons', 'cons.user_id', 'users.id')
-      .leftJoin('skills', 'skills.user_id', 'users.id')
-      .where('users.id', id)
-      .select(
-        'users.*',
-        'cons.id AS conservationist_id',
-        'cons.name',
-        'cons.link_url',
-        'cons.link_text',
-        'cons.call_to_action',
-        'cons.about_us',
-        'cons.issues',
-        'cons.support_us',
-        'cons.longitude',
-        'cons.latitude',
-        db.raw('array_to_json(array_agg(skills.skill)) as skills'),
-      )
-      .groupBy('users.id', 'cons.id')
-      .first();
-    user.bookmarks = await Bookmarks.findUserBookmarks(id);
-  } else if (user.roles === 'supporter') {
-    const bookmarks = await Bookmarks.findUserBookmarks(id);
-    user = await db('users')
-      .leftJoin('supporters as sup', 'sup.user_id', 'users.id')
-      .where('users.id', id)
-      .select('users.*', 'sup.name')
-      .first();
-    user.bookmarks = bookmarks;
+      return user;
+    }
+  } catch (err) {
+    console.log(err);
   }
-
-  return user;
 }
 
 // DO NOT MODIFY. This model is available to the outside.
@@ -176,10 +181,11 @@ async function findUserStatus(sub) {
     .where({ sub })
     .first()
     .then(
-      (usr) => usr && {
-        ...usr,
-        name: usr.sup_name || usr.org_name || 'User',
-      },
+      (usr) =>
+        usr && {
+          ...usr,
+          name: usr.sup_name || usr.org_name || 'User',
+        }
     );
 
   const response = {};
@@ -283,18 +289,18 @@ async function updateSkillsTable(user, id) {
           user_id: id,
           skill: skillObj.skill,
           description: skillObj.description,
-        })),
+        }))
       )
       .toQuery();
     await db.raw(
-      `${insertQuery} ON CONFLICT (user_id, skill) DO UPDATE SET description = EXCLUDED.description`,
+      `${insertQuery} ON CONFLICT (user_id, skill) DO UPDATE SET description = EXCLUDED.description`
     );
   }
 
   await db('skills')
     .whereNotIn(
       'skill',
-      skills.map((skillObj) => skillObj.skill),
+      skills.map((skillObj) => skillObj.skill)
     )
     .andWhere('user_id', id)
     .delete();
@@ -304,10 +310,12 @@ async function update(user, id) {
   const existingUser = await findById(id);
   const isEmpty = (obj) => Object.getOwnPropertyNames(obj).length === 0;
   const triggerUsers = !isEmpty(pick(user, userColumns));
-  const triggerConservationists = !isEmpty(pick(user, conservationistColumns))
-    && existingUser.roles === 'conservationist';
-  const triggerSupporters = !isEmpty(pick(user, supporterColumns))
-    && existingUser.roles === 'supporter';
+  const triggerConservationists =
+    !isEmpty(pick(user, conservationistColumns)) &&
+    existingUser.roles === 'conservationist';
+  const triggerSupporters =
+    !isEmpty(pick(user, supporterColumns)) &&
+    existingUser.roles === 'supporter';
   const triggerSkills = user.skills && Array.isArray(user.skills);
 
   if (triggerUsers) {
@@ -341,7 +349,7 @@ const getNameAndAvatarByIds = async (ids) => {
         'users.roles',
         'users.profile_image',
         'cons.name as org_name',
-        'sup.name as sup_name',
+        'sup.name as sup_name'
       );
     if (users && users.length > 0) {
       users = users.map((user) => ({
