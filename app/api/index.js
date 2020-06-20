@@ -20,13 +20,13 @@ router.use(
   '/contributors',
   checkJwt,
   checkDeactivated,
-  require('./contributors')
+  require('./contributors'),
 );
 router.use(
   '/submissions',
   checkJwt,
   checkDeactivated,
-  require('./application_submissions')
+  require('./application_submissions'),
 );
 router.use('/feed', require('./feed'));
 router.use('/posts', checkJwt, checkDeactivated, require('./posts'));

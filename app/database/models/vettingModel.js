@@ -4,7 +4,7 @@ const log = require('../../logger');
 
 const findVettingUserBySub = async (sub) => {
   const user = await db('vetting').where({ sub }).first();
-  console.log('user from findVettingUserBySub', user);
+  // console.log('user from findVettingUserBySub', user);
   return user;
 };
 
@@ -24,17 +24,14 @@ const addVettingUser = async (user) => {
   }
 };
 
-const findAll = async () => {
-  return db('vetting');
-};
+const findAll = async () => db('vetting');
 
 const deleteUser = async (sub) => {
   const deleted = await db('vetting').where({ sub }).del();
   if (deleted) {
     return sub;
-  } else {
-    return 0;
   }
+  return 0;
 };
 
 // copies user to users and conservationists table and deletes them from vetting table
