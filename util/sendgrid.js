@@ -1,9 +1,10 @@
 require('dotenv').config();
 const sgMail = require('@sendgrid/mail');
+
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
-const sendApprovalMail = (user_email) => {
+const sendApprovalMail = (userEmail) => {
   const msg = {
-    to: user_email,
+    to: userEmail,
     from: 'rasha@fastmail.com',
     subject: 'Sending with Twilio SendGrid is Fun',
     text: 'and easy to do anywhere, even with Node.js',
@@ -11,12 +12,16 @@ const sendApprovalMail = (user_email) => {
   };
   sgMail
     .send(msg)
-    .then(() => console.log('send mail success'))
-    .catch(console.log);
+    .then(() => {
+      // console.log('send mail success')
+    })
+    .catch((error) => {
+      // console.log(error)
+    });
 };
-const sendDenialMail = (user_email) => {
+const sendDenialMail = (userEmail) => {
   const msg = {
-    to: user_email,
+    to: userEmail,
     from: 'rasha@fastmail.com',
     subject: 'NO POTATO',
     text: 'Your application has been denied.',
@@ -24,8 +29,12 @@ const sendDenialMail = (user_email) => {
   };
   sgMail
     .send(msg)
-    .then(() => console.log('send mail success'))
-    .catch(console.log);
+    .then(() => {
+      // console.log('send mail success');
+    })
+    .catch((error) => {
+      // console.log(error);
+    });
 };
 
 module.exports = { sendApprovalMail, sendDenialMail };

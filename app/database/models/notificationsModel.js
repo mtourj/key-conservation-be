@@ -13,8 +13,7 @@ const db = require('../dbConfig.js');
 */
 
 function get(UID) {
-  return db('notifications')
-    .where('user_id', UID);
+  return db('notifications').where('user_id', UID);
 }
 
 function getByID(UID, NID) {
@@ -34,10 +33,19 @@ function mark(UID, NID) {
     .update({ new_notification: false });
 }
 
-function markAll(UID) {
+function markAll(UID, notificationType) {
+  if (notificationType === 8) {
+    // If 8, mark literally everything for this user.
+
+    return db('notifications')
+      .select('*')
+      .where('user_id', UID)
+      .update({ new_notification: false });
+  }
   return db('notifications')
     .select('*')
     .where('user_id', UID)
+    .andWhere('notification_type', notificationType)
     .update({ new_notification: false });
 }
 
@@ -50,16 +58,21 @@ function deleteByID(UID, NID) {
     .del();
 }
 
-function deleteAll(UID) {
+function deleteAll(UID, notificationType) {
+  if (notificationType === 8) {
+    // If 8, delete literally everything for this user.
+
+    return db('notifications').select('*').where('user_id', UID).del();
+  }
   return db('notifications')
     .select('*')
     .where('user_id', UID)
+    .andWhere('notification_type', notificationType)
     .del();
 }
 
 function create(data) {
-  return db('notifications')
-    .insert(data);
+  return db('notifications').insert(data);
 }
 
 module.exports = {

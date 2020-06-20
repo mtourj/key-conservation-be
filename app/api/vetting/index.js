@@ -1,4 +1,5 @@
 const express = require('express');
+
 const router = express.Router();
 const log = require('../../logger');
 const S3Upload = require('../../middleware/s3Upload');
@@ -14,9 +15,8 @@ router.get('/', async (req, res) => {
   try {
     if (allUsers) {
       return res.status(200).json(allUsers);
-    } else {
-      return res.status(404).json({ message: 'No users in vetting database' });
     }
+    return res.status(404).json({ message: 'No users in vetting database' });
   } catch (error) {
     log.error(error);
     return res.status(500).json({ message: error.message, error });
@@ -26,29 +26,27 @@ router.get('/', async (req, res) => {
 // Check vetting status with user sub
 router.get('/:sub', async (req, res) => {
   const { sub } = req.params;
-  console.log('sub from vetting endpoint', sub);
+  // console.log('sub from vetting endpoint', sub);
   try {
     const vettingUser = await Vetting.findVettingUserBySub(sub);
     if (vettingUser) {
-      console.log('vetting user from get vetting status endpoint', vettingUser);
+      // console.log('vetting user from get vetting status endpoint', vettingUser);
       return res.status(200).json({
         approvalStatus: 'Pending',
         message: 'The user has not yet been verified',
       });
-    } else {
-      const newUser = await Users.findBySub(sub);
-      if (newUser) {
-        console.log('newUser', newUser);
-        return res.status(200).json({
-          approvalStatus: 'Approved',
-          message: 'The user was approved',
-        });
-      } else {
-        return res
-          .status(404)
-          .json({ approvalStatus: 'Denied', message: 'The user was denied' });
-      }
     }
+    const newUser = await Users.findBySub(sub);
+    if (newUser) {
+      // console.log('newUser', newUser);
+      return res.status(200).json({
+        approvalStatus: 'Approved',
+        message: 'The user was approved',
+      });
+    }
+    return res
+      .status(404)
+      .json({ approvalStatus: 'Denied', message: 'The user was denied' });
   } catch (error) {
     log.error(error);
     return res.status(500).json({ message: error.message, error });
@@ -56,7 +54,7 @@ router.get('/:sub', async (req, res) => {
 });
 
 router.post('/', S3Upload.upload.single('photo'), async (req, res) => {
-  let user = {
+  const user = {
     ...req.body,
     profile_image: req.file
       ? req.file.location
@@ -69,9 +67,8 @@ router.post('/', S3Upload.upload.single('photo'), async (req, res) => {
         newUser,
         message: 'The user was successfully added to vetting database',
       });
-    } else {
-      return res.status(404).json({ message: 'nope' });
     }
+    return res.status(404).json({ message: 'nope' });
   } catch (error) {
     log.error(error);
     return res.status(500).json({ message: error.message, error });
@@ -90,7 +87,7 @@ router.delete('/:id', async (req, res) => {
       deleteFromAuth0(user.sub);
       res.status(200).json({
         sub: deleted.sub,
-        msg: `User has been deleted from vetting table.`,
+        msg: 'User has been deleted from vetting table.',
       });
     } else {
       res
@@ -105,7 +102,7 @@ router.delete('/:id', async (req, res) => {
 
 // approve application
 router.put('/:id', async (req, res) => {
-  const id = req.params.id;
+  const { id } = req.params;
   try {
     const approvedUser = await Vetting.approveUser(id);
     if (approvedUser) {
@@ -114,9 +111,8 @@ router.put('/:id', async (req, res) => {
         approvedUser,
         message: 'The user was moved successfully to the users table',
       });
-    } else {
-      return res.status(404);
     }
+    return res.status(404);
   } catch (error) {
     log.error(error);
     return res.status(500).json({ message: error.message, error });

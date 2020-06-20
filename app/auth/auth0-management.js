@@ -1,4 +1,5 @@
-const ManagementClient = require('auth0').ManagementClient;
+const { ManagementClient } = require('auth0');
+
 const auth0 = new ManagementClient({
   domain: 'key-conservation.auth0.com',
   clientId: process.env.AUTH0_CLIENT_ID,
@@ -9,11 +10,11 @@ const auth0 = new ManagementClient({
 const deleteFromAuth0 = async (sub) => {
   auth0
     .deleteUser({ id: sub })
-    .then(function () {
-      console.log('user successfully deleted');
+    .then(() => {
+      // console.log('user successfully deleted');
     })
-    .catch(function (err) {
-      console.log(err);
+    .catch((err) => {
+      // console.log(err);
     });
 };
 
