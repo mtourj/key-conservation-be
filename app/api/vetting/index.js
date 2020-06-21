@@ -9,6 +9,7 @@ const deleteFromAuth0 = require('../../auth/auth0-management');
 
 const Vetting = require('../../database/models/vettingModel');
 const Users = require('../../database/models/usersModel');
+const DeniedUsers = require('../../database/models/deniedUsersModel');
 
 router.get('/', async (req, res) => {
   const allUsers = await Vetting.findAll();
@@ -44,9 +45,13 @@ router.get('/:sub', async (req, res) => {
         message: 'The user was approved',
       });
     }
-    return res
-      .status(404)
-      .json({ approvalStatus: 'Denied', message: 'The user was denied' });
+    const deniedUser = await DeniedUsers.findDeniedUserBySub(sub);
+    if (deniedUser) {
+      return res
+        .status(404)
+        .json({ approvalStatus: 'Denied', message: 'The user was denied' });
+    }
+    return res.status(404).json({ message: 'Error finding user' });
   } catch (error) {
     log.error(error);
     return res.status(500).json({ message: error.message, error });
