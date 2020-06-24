@@ -13,7 +13,9 @@ const db = require('../dbConfig.js');
 */
 
 function get(UID) {
-  return db('notifications').where('user_id', UID);
+  return db('notifications')
+    .where('user_id', UID)
+    .orderBy('notification_id', 'desc');
 }
 
 function getByID(UID, NID) {
