@@ -232,6 +232,7 @@ async function add(user) {
         const recipient = await PaymentRails.recipient.create({
           type: 'business',
           email: user.email,
+          referenceId: user.sub,
           // address: {
           // street1: "123 Main St",
           // country: "US",

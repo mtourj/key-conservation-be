@@ -123,6 +123,7 @@ async function updateById(id, changes) {
 }
 
 module.exports = {
+  getPostsWhere,
   deleteById,
   getMostRecentPosts,
   getPostsByUserId,

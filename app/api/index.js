@@ -30,6 +30,7 @@ router.use(
 );
 router.use('/feed', require('./feed'));
 router.use('/posts', checkJwt, checkDeactivated, require('./posts'));
+router.use('/donations', checkJwt, checkDeactivated, require('./donations'));
 
 // router.use('/connections', checkJwt, checkDeactivated, require('./connections'));
 
