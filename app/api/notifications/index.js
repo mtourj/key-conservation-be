@@ -25,18 +25,7 @@ const Notifications = require('../../database/models/notificationsModel'); // Th
 router.get('/:UID', async (req, res) => {
   const notifications = await Notifications.get(req.params.UID);
 
-  if (notifications) {
-    res
-      .status(200)
-      .json({
-        notifications,
-        message: `${notifications.length} notifications were found`,
-      });
-  } else {
-    res
-      .status(400)
-      .json({ message: 'No notifications were found in the database' });
-  }
+  if (notifications) { res.status(200).json({ notifications, message: `${notifications.length} notifications were found` }); } else { res.status(400).json({ message: 'No notifications were found in the database' }); }
 });
 
 // router.get('/', restricted, async (req, res) => {
@@ -61,18 +50,9 @@ router.get('/:UID', async (req, res) => {
 
 router.get('/:UID/:NID', async (req, res) => {
   try {
-    const notification = await Notifications.getByID(
-      req.params.UID,
-      req.params.NID,
-    );
+    const notification = await Notifications.getByID(req.params.UID, req.params.NID);
 
-    if (notification) {
-      res.status(200).json({ notification, message: 'Notification found' });
-    } else {
-      res
-        .status(400)
-        .json({ message: 'No notification found in the database' });
-    }
+    if (notification) { res.status(200).json({ notification, message: 'Notification found' }); } else { res.status(400).json({ message: 'No notification found in the database' }); }
   } catch (err) {
     log.error(err);
     res.status(500).json({ err, message: 'Unable to make request to server' });
@@ -101,18 +81,9 @@ router.get('/:UID/:NID', async (req, res) => {
 
 router.put('/', async (req, res) => {
   try {
-    const notification = await Notifications.mark(
-      req.body.userID,
-      req.body.notifID,
-    );
+    const notification = await Notifications.mark(req.body.userID, req.body.notifID);
 
-    if (notification) {
-      res.status(200).json({ notification, message: 'Notification updated' });
-    } else {
-      res
-        .status(400)
-        .json({ message: 'No notification found in the database' });
-    }
+    if (notification) { res.status(200).json({ notification, message: 'Notification updated' }); } else { res.status(400).json({ message: 'No notification found in the database' }); }
   } catch (err) {
     log.error(err);
     res.status(500).json({ err, message: 'Unable to make request to server' });
@@ -141,18 +112,9 @@ router.put('/', async (req, res) => {
 
 router.delete('/', async (req, res) => {
   try {
-    const success = await Notifications.deleteByID(
-      req.body.userID,
-      req.body.notifID,
-    );
+    const success = await Notifications.deleteByID(req.body.userID, req.body.notifID);
 
-    if (success === 1) {
-      res.status(200).json({ message: 'Notification deleted' });
-    } else {
-      res
-        .status(400)
-        .json({ message: 'No notification found in the database' });
-    }
+    if (success === 1) { res.status(200).json({ message: 'Notification deleted' }); } else { res.status(400).json({ message: 'No notification found in the database' }); }
   } catch (err) {
     log.error(err);
     res.status(500).json({ err, message: 'Unable to make request to server' });
@@ -179,19 +141,11 @@ router.delete('/', async (req, res) => {
 
 // });
 
-// Yeehaw from Texas.
 router.put('/all', async (req, res) => {
   try {
-    const notifications = await Notifications.markAll(
-      req.body.userID,
-      req.body.notificationType,
-    );
+    const notifications = await Notifications.markAll(req.body.userID);
 
-    if (notifications) { res.status(200).json({ message: 'Notifications updated' }); } else {
-      res
-        .status(400)
-        .json({ message: 'No notifications found in the database' });
-    }
+    if (notifications) { res.status(200).json({ message: 'Notifications updated' }); } else { res.status(400).json({ message: 'No notifications found in the database' }); }
   } catch (err) {
     log.error(err);
     res.status(500).json({ err, message: 'Unable to make request to server' });
@@ -222,13 +176,7 @@ router.delete('/all', async (req, res) => {
   try {
     const success = await Notifications.deleteAll(req.body.userID);
 
-    if (success >= 1) {
-      res.status(200).json({ message: `${success} notifications deleted` });
-    } else {
-      res
-        .status(400)
-        .json({ message: 'No notifications found in the database' });
-    }
+    if (success >= 1) { res.status(200).json({ message: `${success} notifications deleted` }); } else { res.status(400).json({ message: 'No notifications found in the database' }); }
   } catch (err) {
     log.error(err);
     res.status(500).json({ err, message: 'Unable to make request to server' });
@@ -259,13 +207,7 @@ router.post('/', async (req, res) => {
   try {
     const notification = await Notifications.create(req.body);
 
-    if (notification) {
-      res.status(200).json({ message: 'Notification created succesfully' });
-    } else {
-      res
-        .status(400)
-        .json({ message: 'There was a problem creating the notification' });
-    }
+    if (notification) { res.status(200).json({ message: 'Notification created succesfully' }); } else { res.status(400).json({ message: 'There was a problem creating the notification' }); }
   } catch (err) {
     log.error(err);
     res.status(500).json({ err, message: 'Unable to make request to server' });

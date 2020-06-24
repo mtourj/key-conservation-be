@@ -14,17 +14,10 @@ class WebSocketManager {
   }
 }
 
-function sendWSMessage(message, userId = null) {
-  if (userId) {
-    // TODO: Implement sending to specific clients
-    // console.log(WebSocketManager.getClients());
-  } else {
-    WebSocketManager.getClients().forEach((client) => {
-      if (client.readyState === WebSocket.OPEN) {
-        client.send(JSON.stringify(message));
-      }
-    });
-  }
+function sendWSMessage(message) {
+  WebSocketManager.getClients().forEach((client) => {
+    if (client.readyState === WebSocket.OPEN) { client.send(JSON.stringify(message)); }
+  });
 }
 
 module.exports = { WebSocketManager, sendWSMessage };

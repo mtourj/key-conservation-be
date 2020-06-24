@@ -9,8 +9,6 @@ const Reports = require('../../database/models/reportModel');
 const Connections = require('../../database/models/connectionsModel');
 const ApplicationSubmission = require('../../database/models/applicationSubmissionsModel');
 
-const pick = require('../../../util/pick');
-
 const S3Upload = require('../../middleware/s3Upload');
 const restricted = require('../../middleware/authJwt.js');
 const {
@@ -207,46 +205,34 @@ router.post('/', S3Upload.upload.single('photo'), async (req, res) => {
 });
 
 router.put(
-  '/',
+  '/:id',
   restricted,
   S3Upload.upload.single('photo'),
   async (req, res) => {
-    const sanitizedBody = pick(req.body, [
-      'name',
-      'phone_numner',
-      'mini_bio',
-      'email',
-      'link_text',
-      'call_to_action',
-      'about_us',
-      'facebook',
-      'instagram',
-      'twitter',
-      'link_url',
-      'location',
-      'profile_image',
-      'skills',
-    ]);
+    const { id } = req.params;
 
     const newUser = {
-      ...sanitizedBody,
-    };
-
-    if (sanitizedBody.profile_image !== undefined) {
-      newUser.profile_image = req.file
+      ...req.body,
+      profile_image: req.file
         ? req.file.location
-        : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
-    }
+        : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png',
+    };
 
     log.verbose('Updated user in PUT /users/:id', newUser);
 
     try {
       const reqUsr = await Users.findBySub(req.user.sub);
 
-      const user = await Users.update(newUser, reqUsr.id);
+      if (Number(reqUsr.id) !== Number(id) && !reqUsr.admin) {
+        return res
+          .status(401)
+          .json({ message: 'You may not modify this profile!' });
+      }
+
+      const user = await Users.update(newUser, id);
 
       if (user) {
-        res.status(200).json(newUser);
+        res.status(200).json({ message: 'Successfully updated user', user });
       } else {
         res.status(404).json({ message: 'The user would not be updated' });
       }

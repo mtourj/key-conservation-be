@@ -102,16 +102,11 @@ async function findById(id) {
 }
 
 async function findOriginalCampaignPostByCampaignId(campaignId) {
-  return getPostsWhere({
-    is_update: false,
-    'campaign_posts.campaign_id': campaignId,
-  }).first();
+  return getPostsWhere({ is_update: false, 'campaign_posts.campaign_id': campaignId }).first();
 }
 
-async function findAllCampaignUpdatesByCampaignId(campaignId, limit = 2048) {
-  return getPostsWhere({
-    'campaign_posts.campaign_id': campaignId,
-  }).limit(limit);
+async function findAllCampaignUpdatesByCampaignId(campaignId) {
+  return getPostsWhere({ 'campaign_posts.campaign_id': campaignId });
 }
 
 async function insert(post) {
@@ -123,7 +118,6 @@ async function updateById(id, changes) {
 }
 
 module.exports = {
-  getPostsWhere,
   deleteById,
   getMostRecentPosts,
   getPostsByUserId,
