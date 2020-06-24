@@ -3,6 +3,7 @@ const CampaignPosts = require('./campaignPostsModel');
 const Bookmarks = require('./socialModel');
 const Skills = require('./skillsEnum');
 const pick = require('../../../util/pick');
+const PaymentRails = require('../../../util/paymentrails');
 
 // Columns of the user model that are stored in the users table
 const userColumns = [
@@ -227,6 +228,16 @@ async function add(user) {
 
     if (id) {
       if (user.roles === 'conservationist') {
+        // Create PaymentRails recipient account
+        const recipient = await PaymentRails.recipient.create({
+          type: 'business',
+          email: user.email,
+          // address: {
+          // street1: "123 Main St",
+          // country: "US",
+          // }
+        });
+
         const conservationistsData = {
           user_id: id,
           name: user.name,
@@ -238,7 +249,9 @@ async function add(user) {
           point_of_contact_name: user.point_of_contact_name,
           longitude: user.longitude,
           latitude: user.latitude,
+          receipient_id: recipient.id,
         };
+
         addCons(conservationistsData);
       }
       if (user.roles === 'supporter') {
