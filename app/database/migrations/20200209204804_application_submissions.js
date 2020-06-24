@@ -18,7 +18,7 @@ exports.up = function (knex) {
       .onDelete('RESTRICT')
       .onUpdate('CASCADE');
     table
-      .enum('decision', decisions, { useNative: true, enumName: 'enum_decisionsa' })
+      .enu('decision', decisions, { useNative: true, enumName: 'enum_decisions' })
       .defaultTo('PENDING')
       .notNullable();
     table.text('why_project');
