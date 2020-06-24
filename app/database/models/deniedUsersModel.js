@@ -1,10 +1,9 @@
 const db = require('../dbConfig');
 const Vetting = require('../models/vettingModel');
-const log = require('../../logger');
 
 // copies user to denied_users table and deletes them from vetting table
 const denyUser = async (sub) => {
-  const user = await findVettingUserBySub(sub);
+  const user = await Vetting.findVettingUserBySub(sub);
   const deniedUserId = await db('denied_users').insert(user);
   await Vetting.deleteUser(sub);
   return deniedUserId;
